@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f1e7">
+  <title>AUTHENTIQUE — Recipe Calculator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #34281f;
+      --muted: #827467;
+      --cream: #f7f1e7;
+      --paper: #fffdf9;
+      --line: #e9dfd1;
+      --coffee: #70452f;
+      --coffee-dark: #523321;
+      --matcha: #657648;
+      --matcha-pale: #eef1e6;
+      --peach: #f4e3d3;
+      --shadow: 0 12px 32px rgb(75 52 33 / 7%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 90% 0%, rgb(222 224 196 / 42%), transparent 32rem),
+        var(--cream);
+    }
+
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+
+    .app-shell {
+      width: min(100% - 32px, 760px);
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--coffee-dark);
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 1px solid #dfcfba;
+      border-radius: 12px;
+      background: var(--paper);
+      font-size: 19px;
+    }
+
+    .reset-button {
+      min-height: 42px;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgb(255 253 249 / 75%);
+      color: var(--coffee);
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .reset-button:hover { background: white; }
+
+    .hero { margin-bottom: 23px; }
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--matcha);
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2rem, 8vw, 3.25rem);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.08;
+    }
+    .creator-credit {
+      flex: 0 0 auto;
+      color: var(--coffee);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .hero-copy {
+      max-width: 500px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: .98rem;
+      line-height: 1.55;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin: 0 0 17px;
+      padding: 6px;
+      border: 1px solid #e8dece;
+      border-radius: 18px;
+      background: rgb(255 253 249 / 72%);
+    }
+    .tab {
+      min-height: 54px;
+      padding: 8px 7px;
+      border: 0;
+      border-radius: 13px;
+      background: transparent;
+      color: var(--muted);
+      font-size: clamp(.72rem, 3vw, .88rem);
+      font-weight: 750;
+      line-height: 1.2;
+      cursor: pointer;
+      transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+    }
+    .tab[aria-selected="true"] {
+      background: var(--coffee);
+      color: white;
+      box-shadow: 0 4px 10px rgb(82 51 33 / 18%);
+    }
+    .tab:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 3px solid #aeb98e;
+      outline-offset: 2px;
+    }
+
+    .panel[hidden] { display: none; }
+    .panel {
+      padding: clamp(18px, 5vw, 28px);
+      border: 1px solid var(--line);
+      border-radius: 23px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .panel-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 21px;
+    }
+    h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.65rem;
+      font-weight: 500;
+      letter-spacing: -.025em;
+    }
+    .section-copy {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+    .badge {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--matcha-pale);
+      color: #53633a;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .03em;
+    }
+
+    .field-label {
+      display: block;
+      margin: 0 0 8px;
+      color: #59483a;
+      font-size: .83rem;
+      font-weight: 750;
+    }
+    select, .number-input {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 14px;
+      border: 1px solid #dfd4c6;
+      border-radius: 13px;
+      background: #fffefa;
+      color: var(--ink);
+      font-size: 1rem;
+    }
+    select { cursor: pointer; }
+    input[type="number"] { appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 21px;
+    }
+    .cup-stepper {
+      display: flex;
+      min-height: 52px;
+      align-items: center;
+      gap: 7px;
+      padding: 4px;
+      border: 1px solid #dfd4c6;
+      border-radius: 13px;
+      background: #fffefa;
+    }
+    .step-button {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 10px;
+      background: #f3ece1;
+      color: var(--coffee-dark);
+      font-size: 1.35rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .step-button:hover { background: #eadcc9; }
+    .cup-stepper input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 1.08rem;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .recipe-card {
+      overflow: hidden;
+      border: 1px solid #e7ddcf;
+      border-radius: 17px;
+      background: #fffefa;
+    }
+    .recipe-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 15px 17px;
+      background: #f7f2e9;
+      font-weight: 800;
+    }
+    .recipe-title small {
+      color: var(--muted);
+      font-size: .75rem;
+      font-weight: 650;
+    }
+    .ingredient-list { margin: 0; padding: 0 17px; list-style: none; }
+    .ingredient-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 0;
+      border-bottom: 1px solid #f0e9df;
+      color: #55483c;
+      font-size: .94rem;
+    }
+    .ingredient-list li:last-child { border-bottom: 0; }
+    .ingredient-list output {
+      color: var(--coffee-dark);
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .recipe-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 14px 17px;
+      border-top: 1px solid var(--line);
+      background: #fbf8f2;
+      color: var(--coffee-dark);
+      font-weight: 800;
+    }
+    .note {
+      margin: 13px 0 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f3f4ec;
+      color: #5d6649;
+      font-size: .82rem;
+      line-height: 1.5;
+    }
+
+    .calculator-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .prep-card {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #fffefa;
+    }
+    .prep-card h3 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.3rem;
+      font-weight: 500;
+    }
+    .prep-card .section-copy { margin-bottom: 15px; }
+    .prep-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+    .prep-controls.single { grid-template-columns: 1fr; }
+    .prep-controls .field-label { font-size: .78rem; }
+    .prep-controls .number-input, .prep-controls select {
+      min-height: 46px;
+      font-size: .94rem;
+    }
+    .compact-list li { padding: 11px 0; font-size: .88rem; }
+    .compact-list { padding: 0 14px; }
+    .compact-title { padding: 12px 14px; font-size: .92rem; }
+    .footnote {
+      margin: 22px 0 0;
+      color: #988c7e;
+      font-size: .75rem;
+      text-align: center;
+    }
+
+    @media (min-width: 620px) {
+      .app-shell { padding-top: 38px; }
+      .calculator-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .prep-card { padding: 19px; }
+    }
+    @media (max-width: 410px) {
+      .app-shell { width: min(100% - 22px, 760px); padding-top: 20px; }
+      .control-grid { gap: 10px; }
+      .panel { border-radius: 19px; }
+      .tab { min-height: 51px; }
+      .step-button { width: 38px; }
+      .prep-card { padding: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topline">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">☕</span> AUTHENTIQUE</div>
+      <button class="reset-button" id="reset-button" type="button">Reset</button>
+    </header>
+
+    <div class="hero">
+      <p class="eyebrow">COFFEE and CACAO</p>
+      <div class="hero-title-row">
+        <h1>Recipe Calculator.</h1>
+        <span class="creator-credit">MADE BY SAI</span>
+      </div>
+      <p class="hero-copy">Quick, clear ingredient weights for every cup and batch. Choose a station below to get started.</p>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="Recipe calculator sections">
+      <button class="tab" id="tab-drinks" type="button" role="tab" aria-selected="true" aria-controls="panel-drinks" tabindex="0">Drinks<br>(Per Cup)</button>
+      <button class="tab" id="tab-milk" type="button" role="tab" aria-selected="false" aria-controls="panel-milk" tabindex="-1">Mix Milk<br>Base</button>
+      <button class="tab" id="tab-prep" type="button" role="tab" aria-selected="false" aria-controls="panel-prep" tabindex="-1">Tea Bases<br>&amp; Creams</button>
+    </nav>
+
+    <section class="panel" id="panel-drinks" role="tabpanel" aria-labelledby="tab-drinks">
+      <div class="panel-heading">
+        <div>
+          <h2>Drinks per cup</h2>
+          <p class="section-copy">Scale a drink recipe up for your order.</p>
+        </div>
+        <span class="badge">MADE TO ORDER</span>
+      </div>
+      <div class="control-grid">
+        <div>
+          <label class="field-label" for="drink-select">Choose a drink</label>
+          <select id="drink-select">
+            <option value="matcha">Matcha</option>
+            <option value="thai">Thai Tea</option>
+            <option value="green">Green Tea</option>
+            <option value="cacao">Cacao</option>
+            <option value="mocha">Mocha</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="cup-count">Number of cups</label>
+          <div class="cup-stepper">
+            <button class="step-button" type="button" data-step="-1" aria-label="Remove one cup">−</button>
+            <input id="cup-count" type="number" min="0" step="1" value="1" inputmode="numeric" aria-label="Number of cups">
+            <button class="step-button" type="button" data-step="1" aria-label="Add one cup">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="recipe-card" aria-live="polite">
+        <div class="recipe-title"><span id="drink-recipe-name">Matcha</span><small id="drink-serving">1 cup</small></div>
+        <ul class="ingredient-list" id="drink-ingredients"></ul>
+        <div class="recipe-total"><span>Total ingredients</span><output id="drink-total">35 g</output></div>
+      </div>
+      <p class="note" id="drink-note" hidden></p>
+    </section>
+
+    <section class="panel" id="panel-milk" role="tabpanel" aria-labelledby="tab-milk" hidden>
+      <div class="panel-heading">
+        <div>
+          <h2>Mix milk base</h2>
+          <p class="section-copy">Make just enough for the drinks you need.</p>
+        </div>
+        <span class="badge">BATCH PREP</span>
+      </div>
+      <div class="control-grid">
+        <div>
+          <label class="field-label" for="milk-cups">Number of cups</label>
+          <input class="number-input" id="milk-cups" type="number" min="0" step="1" value="1" inputmode="numeric">
+        </div>
+        <div class="note" style="margin:0">Per cup: 20g condensed milk + 30g evaporated milk.</div>
+      </div>
+      <div class="recipe-card" aria-live="polite">
+        <div class="recipe-title"><span>Mix milk base</span><small id="milk-serving">1 cup</small></div>
+        <ul class="ingredient-list">
+          <li><span>Condensed Milk</span><output id="milk-condensed">20 g</output></li>
+          <li><span>Evaporated Milk</span><output id="milk-evaporated">30 g</output></li>
+        </ul>
+        <div class="recipe-total"><span>Total Mix Milk</span><output id="milk-total">50 g</output></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-prep" role="tabpanel" aria-labelledby="tab-prep" hidden>
+      <div class="panel-heading">
+        <div>
+          <h2>Tea bases &amp; creams</h2>
+          <p class="section-copy">Scale your prep recipes without the guesswork.</p>
+        </div>
+        <span class="badge">PREP STATION</span>
+      </div>
+      <div class="calculator-grid">
+        <article class="prep-card" data-base="thai">
+          <h3>Thai Tea Base</h3>
+          <p class="section-copy">50g tea powder + 350g hot water per batch.</p>
+          <div class="prep-controls">
+            <div>
+              <label class="field-label" for="thai-mode">Calculate by</label>
+              <select id="thai-mode" data-mode>
+                <option value="batches">Number of batches</option>
+                <option value="powder">Tea powder (g)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="thai-amount" data-amount-label>Number of batches</label>
+              <input class="number-input" id="thai-amount" data-amount type="number" min="0" step="1" value="1" inputmode="decimal">
+            </div>
+          </div>
+          <div class="recipe-card" aria-live="polite">
+            <div class="recipe-title compact-title"><span>Ingredients</span><small>Thai Tea Base</small></div>
+            <ul class="ingredient-list compact-list">
+              <li><span>Thai Tea Powder</span><output data-powder>50 g</output></li>
+              <li><span>Hot Water</span><output data-water>350 g</output></li>
+            </ul>
+            <div class="recipe-total"><span>Total base</span><output data-total>400 g</output></div>
+          </div>
+        </article>
+
+        <article class="prep-card" data-base="green">
+          <h3>Green Tea Base</h3>
+          <p class="section-copy">70g tea powder + 300g hot water per batch.</p>
+          <div class="prep-controls">
+            <div>
+              <label class="field-label" for="green-mode">Calculate by</label>
+              <select id="green-mode" data-mode>
+                <option value="batches">Number of batches</option>
+                <option value="powder">Tea powder (g)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="green-amount" data-amount-label>Number of batches</label>
+              <input class="number-input" id="green-amount" data-amount type="number" min="0" step="1" value="1" inputmode="decimal">
+            </div>
+          </div>
+          <div class="recipe-card" aria-live="polite">
+            <div class="recipe-title compact-title"><span>Ingredients</span><small>Green Tea Base</small></div>
+            <ul class="ingredient-list compact-list">
+              <li><span>Green Tea Powder</span><output data-powder>70 g</output></li>
+              <li><span>Hot Water</span><output data-water>300 g</output></li>
+            </ul>
+            <div class="recipe-total"><span>Total base</span><output data-total>370 g</output></div>
+          </div>
+        </article>
+
+        <article class="prep-card">
+          <h3>Egg Cream</h3>
+          <p class="section-copy">A balanced, lightly sweet cream per egg.</p>
+          <div class="prep-controls single">
+            <div>
+              <label class="field-label" for="egg-count">Number of eggs</label>
+              <input class="number-input" id="egg-count" type="number" min="0" step="1" value="1" inputmode="numeric">
+            </div>
+          </div>
+          <div class="recipe-card" aria-live="polite">
+            <div class="recipe-title compact-title"><span>Egg Cream</span><small id="egg-serving">1 egg</small></div>
+            <ul class="ingredient-list compact-list">
+              <li><span>Condensed Milk</span><output id="egg-condensed">5 g</output></li>
+              <li><span>Vanilla</span><output id="egg-vanilla">1 g</output></li>
+              <li><span>Honey</span><output id="egg-honey">2 g</output></li>
+            </ul>
+            <div class="recipe-total"><span>Total mixture</span><output id="egg-total">8 g</output></div>
+          </div>
+        </article>
+
+        <article class="prep-card">
+          <h3>Salted Cream</h3>
+          <p class="section-copy">Rich, gently salted topping per cup.</p>
+          <div class="prep-controls single">
+            <div>
+              <label class="field-label" for="cream-cups">Number of cups</label>
+              <input class="number-input" id="cream-cups" type="number" min="0" step="1" value="1" inputmode="numeric">
+            </div>
+          </div>
+          <div class="recipe-card" aria-live="polite">
+            <div class="recipe-title compact-title"><span>Salted Cream</span><small id="cream-serving">1 cup</small></div>
+            <ul class="ingredient-list compact-list">
+              <li><span>Whipping Cream</span><output id="cream-whipping">20 g</output></li>
+              <li><span>Condensed Milk</span><output id="cream-condensed">20 g</output></li>
+              <li><span>Salt</span><output id="cream-salt">0.5 g</output></li>
+              <li><span>Milk</span><output id="cream-milk">30 g</output></li>
+            </ul>
+            <div class="recipe-total"><span>Total mixture</span><output id="cream-total">70.5 g</output></div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <p class="footnote">All ingredient amounts are shown in grams (g).</p>
+  </main>
+
+  <script>
+    (() => {
+      const drinks = {
+        matcha: { name: "Matcha", ingredients: [["Matcha Powder", 5], ["Hot Water", 30]] },
+        thai: { name: "Thai Tea", ingredients: [["Thai Tea Liquid Base", 70]], note: "Thai Tea Base formula: 50g Tea Powder + 350g Hot Water." },
+        green: { name: "Green Tea", ingredients: [["Green Tea Liquid Base", 50]], note: "Green Tea Base formula: 70g Tea Powder + 300g Hot Water." },
+        cacao: { name: "Cacao", ingredients: [["Cacao Powder", 20], ["Hot Water", 40]] },
+        mocha: { name: "Mocha", ingredients: [["Cacao Powder", 15], ["Condensed Milk", 20], ["Evaporated Milk", 30], ["Espresso", 36], ["Fresh Milk", 80]] }
+      };
+
+      const format = (value) => {
+        const rounded = Math.round((value + Number.EPSILON) * 10) / 10;
+        return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} g`;
+      };
+      const readNumber = (input) => {
+        const value = Number.parseFloat(input.value);
+        return Number.isFinite(value) && value >= 0 ? value : 0;
+      };
+      const countLabel = (value, singular, plural) => `${value} ${value === 1 ? singular : plural}`;
+
+      const drinkSelect = document.getElementById("drink-select");
+      const cupCount = document.getElementById("cup-count");
+      const ingredientsList = document.getElementById("drink-ingredients");
+      const drinkNote = document.getElementById("drink-note");
+
+      function updateDrink() {
+        const count = readNumber(cupCount);
+        const drink = drinks[drinkSelect.value];
+        document.getElementById("drink-recipe-name").textContent = drink.name;
+        document.getElementById("drink-serving").textContent = countLabel(count, "cup", "cups");
+        ingredientsList.replaceChildren();
+        let total = 0;
+        drink.ingredients.forEach(([name, amount]) => {
+          const scaled = amount * count;
+          total += scaled;
+          const row = document.createElement("li");
+          const label = document.createElement("span");
+          const output = document.createElement("output");
+          label.textContent = name;
+          output.textContent = format(scaled);
+          row.append(label, output);
+          ingredientsList.append(row);
+        });
+        document.getElementById("drink-total").textContent = format(total);
+        drinkNote.textContent = drink.note || "";
+        drinkNote.hidden = !drink.note;
+      }
+
+      function updateMilk() {
+        const count = readNumber(document.getElementById("milk-cups"));
+        const condensed = 20 * count;
+        const evaporated = 30 * count;
+        document.getElementById("milk-serving").textContent = countLabel(count, "cup", "cups");
+        document.getElementById("milk-condensed").textContent = format(condensed);
+        document.getElementById("milk-evaporated").textContent = format(evaporated);
+        document.getElementById("milk-total").textContent = format(condensed + evaporated);
+      }
+
+      function updateBase(card) {
+        const powderPerBatch = Number(card.dataset.powderPerBatch);
+        const waterPerBatch = Number(card.dataset.waterPerBatch);
+        const mode = card.querySelector("[data-mode]").value;
+        const amount = readNumber(card.querySelector("[data-amount]"));
+        const powder = mode === "powder" ? amount : amount * powderPerBatch;
+        const water = mode === "powder" ? amount * waterPerBatch / powderPerBatch : amount * waterPerBatch;
+        card.querySelector("[data-amount-label]").textContent = mode === "powder" ? "Tea powder (g)" : "Number of batches";
+        card.querySelector("[data-amount]").step = mode === "powder" ? "0.1" : "1";
+        card.querySelector("[data-amount]").inputMode = mode === "powder" ? "decimal" : "numeric";
+        card.querySelector("[data-powder]").textContent = format(powder);
+        card.querySelector("[data-water]").textContent = format(water);
+        card.querySelector("[data-total]").textContent = format(powder + water);
+      }
+
+      function updateEggCream() {
+        const count = readNumber(document.getElementById("egg-count"));
+        const condensed = 5 * count;
+        const vanilla = count;
+        const honey = 2 * count;
+        document.getElementById("egg-serving").textContent = countLabel(count, "egg", "eggs");
+        document.getElementById("egg-condensed").textContent = format(condensed);
+        document.getElementById("egg-vanilla").textContent = format(vanilla);
+        document.getElementById("egg-honey").textContent = format(honey);
+        document.getElementById("egg-total").textContent = format(condensed + vanilla + honey);
+      }
+
+      function updateSaltedCream() {
+        const count = readNumber(document.getElementById("cream-cups"));
+        const whipping = 20 * count;
+        const condensed = 20 * count;
+        const salt = 0.5 * count;
+        const milk = 30 * count;
+        document.getElementById("cream-serving").textContent = countLabel(count, "cup", "cups");
+        document.getElementById("cream-whipping").textContent = format(whipping);
+        document.getElementById("cream-condensed").textContent = format(condensed);
+        document.getElementById("cream-salt").textContent = format(salt);
+        document.getElementById("cream-milk").textContent = format(milk);
+        document.getElementById("cream-total").textContent = format(whipping + condensed + salt + milk);
+      }
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => selectTab(tab));
+        tab.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          const tabs = [...document.querySelectorAll(".tab")];
+          const index = tabs.indexOf(tab);
+          const next = event.key === "Home" ? 0
+            : event.key === "End" ? tabs.length - 1
+            : (index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length;
+          selectTab(tabs[next]);
+          tabs[next].focus();
+        });
+      });
+
+      function selectTab(selected) {
+        document.querySelectorAll(".tab").forEach((tab) => {
+          const active = tab === selected;
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+          document.getElementById(tab.getAttribute("aria-controls")).hidden = !active;
+        });
+      }
+
+      drinkSelect.addEventListener("change", updateDrink);
+      cupCount.addEventListener("input", updateDrink);
+      document.querySelectorAll("[data-step]").forEach((button) => {
+        button.addEventListener("click", () => {
+          cupCount.value = String(Math.max(0, Math.floor(readNumber(cupCount)) + Number(button.dataset.step)));
+          updateDrink();
+        });
+      });
+      document.getElementById("milk-cups").addEventListener("input", updateMilk);
+      document.querySelectorAll("[data-base]").forEach((card) => {
+        const recipe = card.dataset.base === "thai"
+          ? { powder: 50, water: 350 }
+          : { powder: 70, water: 300 };
+        card.dataset.powderPerBatch = recipe.powder;
+        card.dataset.waterPerBatch = recipe.water;
+        card.querySelector("[data-mode]").addEventListener("change", () => {
+          const amount = card.querySelector("[data-amount]");
+          amount.value = card.querySelector("[data-mode]").value === "powder"
+            ? String(recipe.powder)
+            : "1";
+          updateBase(card);
+        });
+        card.querySelector("[data-amount]").addEventListener("input", () => updateBase(card));
+      });
+      document.getElementById("egg-count").addEventListener("input", updateEggCream);
+      document.getElementById("cream-cups").addEventListener("input", updateSaltedCream);
+
+      document.getElementById("reset-button").addEventListener("click", () => {
+        drinkSelect.value = "matcha";
+        cupCount.value = "1";
+        document.getElementById("milk-cups").value = "1";
+        document.getElementById("egg-count").value = "1";
+        document.getElementById("cream-cups").value = "1";
+        document.querySelectorAll("[data-base]").forEach((card) => {
+          card.querySelector("[data-mode]").value = "batches";
+          card.querySelector("[data-amount]").value = "1";
+        });
+        updateDrink();
+        updateMilk();
+        document.querySelectorAll("[data-base]").forEach(updateBase);
+        updateEggCream();
+        updateSaltedCream();
+        selectTab(document.getElementById("tab-drinks"));
+      });
+
+      updateDrink();
+      updateMilk();
+      document.querySelectorAll("[data-base]").forEach(updateBase);
+      updateEggCream();
+      updateSaltedCream();
+    })();
+  </script>
+</body>
+</html>
